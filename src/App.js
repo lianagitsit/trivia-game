@@ -66,13 +66,6 @@ class GameBoard extends Component {
     this.getQuestion();
   }
 
-  componentDidMount(){
-    this.timerID = setTimeout(
-      () => this.tick(),
-      1000
-    );
-  }
-
   componentWillUnmount() {
     clearTimeout(this.timerID);
     clearTimeout(this.outcomeTimerID);
@@ -113,20 +106,20 @@ class GameBoard extends Component {
     if (this.state.gameOver) {
       clearTimeout(this.timerID);
       return;
-    } else if (this.state.guess || this.state.timeToAnswer === 1){
+    } else if (this.state.guess || this.state.timeToAnswer === 1) {
       clearTimeout(this.timerID);
 
       this.outcomeTimerID = setTimeout(
         () => this.outcomeTick(),
         1000
       );
+      //return; 
     } else if (!this.state.guess || this.state.timeToAnswer > 1) {
-
       this.timerID = setTimeout(
         () => this.tick(),
         1000
       );
-    } 
+    }
 
     this.setState({
       timeToAnswer: this.state.timeToAnswer - 1
@@ -178,17 +171,22 @@ class GameBoard extends Component {
 
   // GAME START
   start() {
+    this.timerID = setTimeout(
+      () => this.tick(),
+      1000
+    );
+
     this.setState({
       gameOn: true
     })
   }
 
-  recordResults(){
+  recordResults() {
     var guessedRight = 0;
     var guessedWrong = 0;
     var noGuess = 0;
 
-    if(!this.state.guess){
+    if (!this.state.guess) {
       noGuess++;
     } else if (this.state.guess === this.state.currentQuestion.correctAnswer) {
       guessedRight++;
@@ -208,7 +206,7 @@ class GameBoard extends Component {
   handleGuess(guess) {
     this.setState(
       { guess: guess },
-      () => this.recordResults() // BUG: This doesn't fire if the user times out without clicking!
+      () => this.recordResults() // BUG: This doesn't fire if the user times out without clicking
     );
   };
 
