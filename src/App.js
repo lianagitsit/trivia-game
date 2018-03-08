@@ -47,33 +47,34 @@ class GameBoard extends Component {
     super(props);
     this.state = {
       gameOn: false,
+      gameOver: false,
       timeToAnswer: 5,
-      timeUntilNextQuestion: 5,
+      timeUntilNextQuestion: 1,
       guess: "",
       totalCorrectAnswers: 0,
       totalIncorrectAnswers: 0,
-      totalUnanswered: 0
+      totalUnanswered: 0,
+      questionsCopy: this.props.questions.slice()
       // currentQuestion (set in getQuestion())
     }
     this.handleGuess = this.handleGuess.bind(this);
     this.start = this.start.bind(this);
+    this.restart = this.restart.bind(this);
   }
 
-  // Generate a random question at startup
   componentWillMount() {
     this.getQuestion();
   }
 
-  // componentWillUpdate() {
-  //   if (this.state.timeUntilNextQuestion === 0){
-  //     this.getQuestion();
-  //   }
-  // }
-
   componentDidUpdate() {
 
+    // Clear timers on game over screen
+    if (this.state.gameOver){
+      clearTimeout(this.timerID);
+      clearTimeout(this.outcomeTimerID);  
+    
     // Once the outcome timer is up, stop it and generate a new question
-    if (this.state.timeUntilNextQuestion === -1){
+    } else if (this.state.timeUntilNextQuestion === -1){
       clearTimeout(this.outcomeTimerID);
       this.getQuestion();
     
@@ -102,26 +103,32 @@ class GameBoard extends Component {
   }
 
   getQuestion() {
-    var randomIndex = Math.floor(Math.random() * this.props.questions.length);
-    var randomQuestion = this.props.questions[randomIndex];
+    // A COMPONENT SHOULD NEVER MODIFY ITS OWN PROPS WHAT WAS I THINKING
+    var newQuestionsCopy = this.state.questionsCopy.slice();
+    var randomIndex = Math.floor(Math.random() * newQuestionsCopy.length);
+    var randomQuestion = newQuestionsCopy[randomIndex];
+    var gameOver = this.state.gameOver;
 
     console.log(randomQuestion);
 
-    // Modify questions array in place to remove the current question
-    this.props.questions.splice(randomIndex, 1);
+    // Remove the current question from the available list
+    newQuestionsCopy.splice(randomIndex, 1);
 
-    // if (this.props.questions.length === 0){
-    //   return false;
-    // }
+    // Reset the questions array after all questions have been asked
+    if (newQuestionsCopy.length === 0 && !randomQuestion){
+      gameOver = true;
+      newQuestionsCopy = this.props.questions.slice();
+    }
 
-    console.log(this.props.questions);
+    console.log(newQuestionsCopy);
 
-    // Sets the current question, clears guess and resets timeToAnswer and timeUntilNextQuestion
     this.setState({
+      gameOver: gameOver,
       currentQuestion: randomQuestion,
       guess: "",
       timeToAnswer: 5,
-      timeUntilNextQuestion: 5
+      timeUntilNextQuestion: 1,
+      questionsCopy: newQuestionsCopy
     })
   }
 
@@ -129,6 +136,15 @@ class GameBoard extends Component {
     this.setState({
       timeUntilNextQuestion: this.state.timeUntilNextQuestion - 1
     });
+  }
+
+  restart(gameOn) {
+    this.getQuestion();
+
+    this.setState({
+      gameOn: gameOn,
+      gameOver: false,
+    })
   }
 
   start() {
@@ -150,17 +166,27 @@ class GameBoard extends Component {
   };
 
   render() {
-    console.log("Guess: " + this.state.guess);
-    console.log("Time to answer: " + this.state.timeToAnswer);
-    console.log("Time until next: " + this.state.timeUntilNextQuestion);
+    // console.log("Guess: " + this.state.guess);
+    // console.log("Time to answer: " + this.state.timeToAnswer);
+    // console.log("Time until next: " + this.state.timeUntilNextQuestion);
 
     var display;
     var timeRemaining = (<p>Time: {this.state.timeToAnswer}</p>);
     var timeTilNext = (<p>Next question in: {this.state.timeUntilNextQuestion}</p>);
-    if (!this.state.gameOn) {
+
+    if (!this.state.gameOn && !this.state.gameOver) {
       timeRemaining = false;
       timeTilNext = false;
       display = (<button onClick={this.start}>Start</button>);
+    } else if (this.state.gameOver) {
+      display = (
+        <GameResults 
+          totalCorrectAnswers={this.state.totalCorrectAnswers}
+          totalIncorrectAnswers={this.state.totalIncorrectAnswers}
+          totalUnanswered={this.state.totalUnanswered}
+          onRestart={this.restart}
+        />
+      )
     } else if (!this.state.guess && this.state.timeToAnswer > 0) {
       display = (
         <Question
@@ -177,16 +203,6 @@ class GameBoard extends Component {
         />
       )
     } 
-    
-    // else if(){
-    //   display = (
-    //     <GameResults 
-    //       totalCorrectAnswers={this.state.totalCorrectAnswers}
-    //       totalIncorrectAnswers={this.state.totalIncorrectAnswers}
-    //       totalUnanswered={this.state.totalUnanswered}
-    //     />
-    //   )
-    // }
 
     return (
       <div>
@@ -199,18 +215,28 @@ class GameBoard extends Component {
   }
 }
 
-// class GameResults extends Component {
-//   render(){
-//     return(
-//       <div>
-//         <h2>Game over!</h2>
-//         <p>Correct answers: {this.props.totalCorrectAnswers}</p>
-//         <p>Incorrect answers: {this.props.totalIncorrectAnswers}</p>
-//         <p>Unanswered: {this.props.totalUnanswered}</p>
-//       </div>
-//     )
-//   }
-// }
+class GameResults extends Component {
+  constructor(props){
+    super(props);
+    this.restart = this.restart.bind(this);
+  }
+
+  restart(event){
+    this.props.onRestart(event.target.getAttribute("data-game-on"));
+  }
+
+  render(){
+    return(
+      <div>
+        <h2>Game over!</h2>
+        <p>Correct answers: {this.props.totalCorrectAnswers}</p>
+        <p>Incorrect answers: {this.props.totalIncorrectAnswers}</p>
+        <p>Unanswered: {this.props.totalUnanswered}</p>
+        <button data-game-on="true" onClick={this.restart}>Play again?</button>
+      </div>
+    )
+  }
+}
 
 class Outcome extends Component {
   render() {
@@ -265,7 +291,6 @@ class Answer extends Component {
 
   handleGuess(event) {
     this.props.onUserGuess(event.target.textContent);
-    // console.log("Clicked " + event.target.textContent);
   }
 
   render() {
