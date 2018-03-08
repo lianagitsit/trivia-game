@@ -23,8 +23,11 @@ class GameBoard extends Component {
   constructor(props){
     super(props);
     this.state = {
-      timeToAnswer: 5
+      timeToAnswer: 5,
+      // guess: ''
     }
+
+    this.handleGuess = this.handleGuess.bind(this);
   }
 
   componentDidMount() {
@@ -39,7 +42,7 @@ class GameBoard extends Component {
   }
 
   tick() {
-    console.log("Time: " + this.state.timeToAnswer);
+    // console.log("Time: " + this.state.timeToAnswer);
     this.setState({
       timeToAnswer: this.state.timeToAnswer - 1
     });
@@ -48,19 +51,29 @@ class GameBoard extends Component {
     }
   }
 
+  handleGuess(guess){
+    this.setState({
+      guess: guess
+    });
+  };
+
   render(){
+    console.log("Guess: " + this.state.guess);
 
     var answers = [];
     for (var i = 0; i < this.props.questions.answers.length; i++){
       answers.push(
-        <Answer item={this.props.questions.answers[i]} key={i} />
+        <Answer 
+          item={this.props.questions.answers[i]} 
+          key={i}
+          onUserGuess={this.handleGuess}
+        />
       )
     }
 
     return(
       <div>
         <h1>A Trivia Game</h1>
-        {/* <PlayArea time={this.state.timeToAnswer} questions={this.props.questions} /> */}
         <p>Time: {this.state.timeToAnswer}</p>
         <p>{this.props.questions.question}</p>
         <div className="answers">{answers}</div>
@@ -69,38 +82,20 @@ class GameBoard extends Component {
   }
 }
 
-// class PlayArea extends Component {
-//   render(){
-//     var answers = [];
-//     for (var i = 0; i < this.props.questions.answers.length; i++){
-//       answers.push(
-//         <Answer item={this.props.questions.answers[i]} key={i} />
-//       )
-//     }
-
-//     return(
-//       <div>
-//         <p>Time: {this.props.time}</p>
-//         <p>{this.props.questions.question}</p>
-//         <div className="answers">{answers}</div>
-//       </div>
-//     )
-//   }
-// }
-
 class Answer extends Component {
   constructor(props){
     super(props);
-    this.onAnswerClick = this.onAnswerClick.bind(this);
+    this.handleGuess = this.handleGuess.bind(this);
   }
 
-  onAnswerClick(){
-    console.log("clicked " + this.props.item);
+  handleGuess(event){
+    this.props.onUserGuess(event.target.textContent);
+    console.log("Clicked " + event.target.textContent);
   }
 
   render() {
     return(
-      <div className="answer" onClick={this.onAnswerClick}>
+      <div className="answer" onClick={this.handleGuess}>
         {this.props.item}
       </div>
     )
