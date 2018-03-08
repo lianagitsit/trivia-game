@@ -17,8 +17,8 @@ const QUESTIONS = [
 
   {
     question: "What is the meaning of life?",
-    answers: [10, 46, 42, 1],
-    correctAnswer: 42
+    answers: ["10", "46", "42", "1"],
+    correctAnswer: "42"
   },
 
   {
@@ -49,7 +49,7 @@ class GameBoard extends Component {
       gameOn: false,
       gameOver: false,
       timeToAnswer: 5,
-      timeUntilNextQuestion: 1,
+      timeUntilNextQuestion: 5,
       guess: "",
       totalCorrectAnswers: 0,
       totalIncorrectAnswers: 0,
@@ -66,37 +66,11 @@ class GameBoard extends Component {
     this.getQuestion();
   }
 
-  componentDidUpdate() {
-
-    // Clear timers on game over screen
-    if (this.state.gameOver) {
-      clearTimeout(this.timerID);
-      clearTimeout(this.outcomeTimerID);
-
-      // Once the outcome timer is up, stop it and generate a new question
-    } else if (this.state.timeUntilNextQuestion === -1) {
-      clearTimeout(this.outcomeTimerID);
-      this.getQuestion();
-
-      // If the user makes a guess or they run out of time, 
-      // stop the question timer and start the outcome timer
-    } else if (this.state.guess || this.state.timeToAnswer === 0) {
-      clearTimeout(this.timerID);
-      this.recordResults();
-
-      this.outcomeTimerID = setTimeout(
-        () => this.outcomeTick(),
-        1000
-      );
-
-      // If the user hasn't guessed yet and there's still time to guess, 
-      // keep the question timer running
-    } else if (!this.state.guess || this.state.timeToAnswer > 0) {
-      this.timerID = setTimeout(
-        () => this.tick(),
-        1000
-      );
-    }
+  componentDidMount(){
+    this.timerID = setTimeout(
+      () => this.tick(),
+      1000
+    );
   }
 
   componentWillUnmount() {
@@ -129,18 +103,71 @@ class GameBoard extends Component {
       currentQuestion: randomQuestion,
       guess: "",
       timeToAnswer: 5,
-      timeUntilNextQuestion: 1,
+      timeUntilNextQuestion: 5,
       questionsCopy: newQuestionsCopy
     })
   }
 
-  outcomeTick() {
+  // QUESTION TIMER
+  tick() {
+    if (this.state.gameOver) {
+      clearTimeout(this.timerID);
+      return;
+    } else if (this.state.guess || this.state.timeToAnswer === 1){
+      clearTimeout(this.timerID);
+
+      this.outcomeTimerID = setTimeout(
+        () => this.outcomeTick(),
+        1000
+      );
+    } else if (!this.state.guess || this.state.timeToAnswer > 1) {
+
+      this.timerID = setTimeout(
+        () => this.tick(),
+        1000
+      );
+    } 
+
     this.setState({
-      timeUntilNextQuestion: this.state.timeUntilNextQuestion - 1
+      timeToAnswer: this.state.timeToAnswer - 1
     });
   }
 
+  // OUTCOME TIMER
+  outcomeTick() {
+    if (this.state.gameOver) {
+      clearTimeout(this.outcomeTimerID);
+      return;
+    } else if (this.state.timeUntilNextQuestion === 0) {
+      clearTimeout(this.outcomeTimerID);
+
+      this.getQuestion();
+
+      this.timerID = setTimeout(
+        () => this.tick(),
+        1000
+      );
+
+    } else if (this.state.guess || this.state.timeToAnswer === 0) {
+
+      this.outcomeTimerID = setTimeout(
+        () => this.outcomeTick(),
+        1000
+      );
+
+      this.setState({
+        timeUntilNextQuestion: this.state.timeUntilNextQuestion - 1
+      });
+    }
+  }
+
+  // PLAY AGAIN
   restart(gameOn) {
+    this.timerID = setTimeout(
+      () => this.tick(),
+      1000
+    );
+
     this.getQuestion();
 
     this.setState({
@@ -149,16 +176,11 @@ class GameBoard extends Component {
     })
   }
 
+  // GAME START
   start() {
     this.setState({
       gameOn: true
     })
-  }
-
-  tick() {
-    this.setState({
-      timeToAnswer: this.state.timeToAnswer - 1
-    });
   }
 
   recordResults(){
@@ -166,7 +188,7 @@ class GameBoard extends Component {
     var guessedWrong = 0;
     var noGuess = 0;
 
-    if(this.state.timeToAnswer === 0){
+    if(!this.state.guess){
       noGuess++;
     } else if (this.state.guess === this.state.currentQuestion.correctAnswer) {
       guessedRight++;
@@ -182,41 +204,15 @@ class GameBoard extends Component {
 
   }
 
+  // Handles guess data from Answer component
   handleGuess(guess) {
-    this.setState({
-      guess: guess,
-    });
+    this.setState(
+      { guess: guess },
+      () => this.recordResults() // BUG: This doesn't fire if the user times out without clicking!
+    );
   };
 
-  // checkAnswer(guess) {
-  //   var guessedRight = 0;
-  //   var guessedWrong = 0;
-  //   var noGuess = 0;
-
-  //   if (guess === "correct") {
-  //     guessedRight++;
-  //   } else if (guess === "incorrect") {
-  //     guessedWrong++;
-  //   } else if (guess === "unanswered") {
-  //     noGuess++;
-  //   }
-
-  //   // this.setState({
-  //   //   totalCorrectAnswers: guessedRight,
-  //   //   totalIncorrectAnswers: guessedWrong,
-  //   //   totalUnanswered: noGuess
-  //   // })
-
-  //   console.log("right: " + guessedRight);
-  //   console.log("Wrong: " + guessedWrong);
-  //   console.log("un: " + noGuess);
-
-  // }
-
   render() {
-    // console.log("Guess: " + this.state.guess);
-    // console.log("Time to answer: " + this.state.timeToAnswer);
-    // console.log("Time until next: " + this.state.timeUntilNextQuestion);
 
     var display;
     var timeRemaining = (<p>Time: {this.state.timeToAnswer}</p>);
