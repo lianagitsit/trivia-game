@@ -2,7 +2,25 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
-const QUESTIONS = {question: "What is my name?", answers: ["Liana", "Bob", "Sally", "Jo"], correctAnswer: "Liana"};
+// const QUESTIONS = {
+//   question: "What is my name?", 
+//   answers: ["Liana", "Bob", "Sally", "Jo"], 
+//   correctAnswer: "Liana"
+// };
+
+const QUESTIONS = [
+  {
+    question: "What is my name?", 
+    answers: ["Liana", "Bob", "Sally", "Jo"], 
+    correctAnswer: "Liana"
+  },
+
+  {
+    question: "What is my favorite color?",
+    answers: ["brown", "green", "pink", "puce"],
+    correctAnswer: "green"
+  }
+];
 
 class App extends Component {
   render() {
@@ -12,7 +30,7 @@ class App extends Component {
           <img src={logo} className="App-logo" alt="logo" />
           <h1 className="App-title">Welcome to React</h1>
         </header>
-        <GameBoard questions={QUESTIONS} outcomes={OUTCOMES} />
+        <GameBoard questions={QUESTIONS} />
       </div>
     );
   }
@@ -25,6 +43,11 @@ class GameBoard extends Component {
       timeToAnswer: 5,
     }
     this.handleGuess = this.handleGuess.bind(this);
+  }
+
+  // Generate a random question at startup
+  componentWillMount() {
+    this.getQuestion();
   }
 
   componentDidMount() {
@@ -53,6 +76,14 @@ class GameBoard extends Component {
     });
   };
 
+  getQuestion(){
+    var randomQuestion;
+    randomQuestion = this.props.questions[Math.floor(Math.random() * this.props.questions.length)];
+    this.setState({
+      currentQuestion: randomQuestion
+    })
+  }
+
   render(){
     console.log("Guess: " + this.state.guess);
     console.log(this.state.timeToAnswer);
@@ -61,8 +92,8 @@ class GameBoard extends Component {
     if (!this.state.guess && this.state.timeToAnswer > 0){
       display = (
         <Question 
-          questions={this.props.questions} 
-          onUserGuess={this.handleGuess} 
+          currentQuestion={this.state.currentQuestion} 
+          onUserGuess={this.handleGuess}
         />
       )
     } else if (this.state.guess || this.state.timeToAnswer === 0){
@@ -70,8 +101,8 @@ class GameBoard extends Component {
       display = (
         <Outcome 
           guess={this.state.guess} 
-          correctAnswer={this.props.questions.correctAnswer} 
-          timeToAnswer={this.state.timeToAnswer} 
+          correctAnswer={this.state.currentQuestion.correctAnswer} 
+          timeToAnswer={this.state.timeToAnswer}
         />
       )
     }
@@ -112,10 +143,10 @@ class Outcome extends Component {
 class Question extends Component {
   render() {
     var answers = [];
-    for (var i = 0; i < this.props.questions.answers.length; i++){
+    for (var i = 0; i < this.props.currentQuestion.answers.length; i++){
       answers.push(
         <Answer 
-          item={this.props.questions.answers[i]} 
+          item={this.props.currentQuestion.answers[i]} 
           key={i}
           onUserGuess={this.props.onUserGuess}
         />
@@ -124,7 +155,7 @@ class Question extends Component {
 
     return (
       <div>
-        <p>{this.props.questions.question}</p>
+        <p>{this.props.currentQuestion.question}</p>
         <div className="Answers">{answers}</div>
       </div>
     )
@@ -152,3 +183,6 @@ class Answer extends Component {
 }
 
 export default App;
+
+
+//TODO: Let users enter their own questions and answers. 
