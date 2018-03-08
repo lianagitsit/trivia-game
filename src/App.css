@@ -22,6 +22,18 @@
   font-size: large;
 }
 
+.Answer {
+  margin: 5px auto;
+  width: 33%;
+  border: 1px dotted gray;
+  padding: 5px 0;
+}
+
+.Answer:hover {
+  cursor: pointer;
+  border: 1px solid violet;
+}
+
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
