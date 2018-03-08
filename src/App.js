@@ -2,12 +2,6 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
-// const QUESTIONS = {
-//   question: "What is my name?", 
-//   answers: ["Liana", "Bob", "Sally", "Jo"], 
-//   correctAnswer: "Liana"
-// };
-
 const QUESTIONS = [
   {
     question: "What is my name?",
@@ -77,25 +71,30 @@ class GameBoard extends Component {
   // }
 
   componentDidUpdate() {
+
+    // Once the outcome timer is up, stop it and generate a new question
     if (this.state.timeUntilNextQuestion === -1){
       clearTimeout(this.outcomeTimerID);
       this.getQuestion();
-    } else if (this.state.guess || this.state.timeToAnswer === 0){
+    
+    // If the user makes a guess or they run out of time, 
+    // stop the question timer and start the outcome timer
+    } else if (this.state.guess || this.state.timeToAnswer === 0) {
+      clearTimeout(this.timerID);
       this.outcomeTimerID = setTimeout(
         () => this.outcomeTick(),
         1000
       );
-    }
 
-    if (this.state.timeToAnswer === 0) {
-      clearTimeout(this.timerID);
+    // If the user hasn't guessed yet and there's still time to guess, 
+    // keep the question timer running
     } else if (!this.state.guess || this.state.timeToAnswer > 0){
       this.timerID = setTimeout(
         () => this.tick(),
         1000
       );
     }
-  }
+}
 
   componentWillUnmount() {
     clearTimeout(this.timerID);
@@ -133,11 +132,6 @@ class GameBoard extends Component {
   }
 
   start() {
-    // this.timerID = setTimeout(
-    //   () => this.tick(),
-    //   1000
-    // );
-
     this.setState({
       gameOn: true
     })
@@ -175,7 +169,6 @@ class GameBoard extends Component {
         />
       )
     } else if (this.state.guess || this.state.timeToAnswer === 0) {
-      // clearTimeout(this.timerID);
       display = (
         <Outcome
           guess={this.state.guess}
