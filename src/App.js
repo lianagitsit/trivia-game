@@ -40,21 +40,20 @@ class GameBoard extends Component {
   constructor(props){
     super(props);
     this.state = {
+      gameOn: false,
       timeToAnswer: 5,
+      timeUntilNextQuestion: 5,
+      totalCorrectAnswers: 0,
+      totalIncorrectAnswers: 0,
+      totalUnanswered: 0
     }
     this.handleGuess = this.handleGuess.bind(this);
+    this.start = this.start.bind(this);
   }
 
   // Generate a random question at startup
   componentWillMount() {
     this.getQuestion();
-  }
-
-  componentDidMount() {
-    this.timerID = setInterval(
-      () => this.tick(),
-      1000
-    );
   }
 
   componentWillUnmount() {
@@ -84,12 +83,27 @@ class GameBoard extends Component {
     })
   }
 
+  start(){
+    this.timerID = setInterval(
+      () => this.tick(),
+      1000
+    );
+
+    this.setState({
+      gameOn: true
+    })
+  }
+
   render(){
     console.log("Guess: " + this.state.guess);
     console.log(this.state.timeToAnswer);
 
     var display;
-    if (!this.state.guess && this.state.timeToAnswer > 0){
+    var timeRemaining = (<p>Time: {this.state.timeToAnswer}</p>);
+    if (!this.state.gameOn){
+      timeRemaining = false;
+      display = (<button onClick={this.start}>Start</button>);
+    } else if (!this.state.guess && this.state.timeToAnswer > 0){
       display = (
         <Question 
           currentQuestion={this.state.currentQuestion} 
@@ -110,7 +124,7 @@ class GameBoard extends Component {
     return(
       <div>
         <h1>A Trivia Game</h1>
-        <p>Time: {this.state.timeToAnswer}</p>
+        {timeRemaining}
         {display}
       </div>
     )
