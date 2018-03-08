@@ -10,8 +10,8 @@ import './App.css';
 
 const QUESTIONS = [
   {
-    question: "What is my name?", 
-    answers: ["Liana", "Bob", "Sally", "Jo"], 
+    question: "What is my name?",
+    answers: ["Liana", "Bob", "Sally", "Jo"],
     correctAnswer: "Liana"
   },
 
@@ -19,6 +19,18 @@ const QUESTIONS = [
     question: "What is my favorite color?",
     answers: ["brown", "green", "pink", "puce"],
     correctAnswer: "green"
+  },
+
+  {
+    question: "What is the meaning of life?",
+    answers: [10, 46, 42, 1],
+    correctAnswer: 42
+  },
+
+  {
+    question: "So long and thanks for all the...",
+    answers: ["waffles", "bananas", "helicopters", "fish"],
+    correctAnswer: "fish"
   }
 ];
 
@@ -28,7 +40,7 @@ class App extends Component {
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
+          <h1 className="App-title">Welcome to A Trivia Game</h1>
         </header>
         <GameBoard questions={QUESTIONS} />
       </div>
@@ -37,15 +49,17 @@ class App extends Component {
 }
 
 class GameBoard extends Component {
-  constructor(props){
+  constructor(props) {
     super(props);
     this.state = {
       gameOn: false,
       timeToAnswer: 5,
       timeUntilNextQuestion: 5,
+      guess: "",
       totalCorrectAnswers: 0,
       totalIncorrectAnswers: 0,
       totalUnanswered: 0
+      // currentQuestion (set in getQuestion())
     }
     this.handleGuess = this.handleGuess.bind(this);
     this.start = this.start.bind(this);
@@ -56,88 +70,162 @@ class GameBoard extends Component {
     this.getQuestion();
   }
 
-  componentWillUnmount() {
-    clearInterval(this.timerID);
-  }
+  // componentWillUpdate() {
+  //   if (this.state.timeUntilNextQuestion === 0){
+  //     this.getQuestion();
+  //   }
+  // }
 
-  tick() {
-    this.setState({
-      timeToAnswer: this.state.timeToAnswer - 1
-    });
-    if(this.state.timeToAnswer === 0){
-      clearInterval(this.timerID);
+  componentDidUpdate() {
+    if (this.state.timeUntilNextQuestion === -1){
+      clearTimeout(this.outcomeTimerID);
+      this.getQuestion();
+    } else if (this.state.guess || this.state.timeToAnswer === 0){
+      this.outcomeTimerID = setTimeout(
+        () => this.outcomeTick(),
+        1000
+      );
+    }
+
+    if (this.state.timeToAnswer === 0) {
+      clearTimeout(this.timerID);
+    } else if (!this.state.guess || this.state.timeToAnswer > 0){
+      this.timerID = setTimeout(
+        () => this.tick(),
+        1000
+      );
     }
   }
 
-  handleGuess(guess){
-    this.setState({
-      guess: guess
-    });
-  };
+  componentWillUnmount() {
+    clearTimeout(this.timerID);
+    clearTimeout(this.outcomeTimerID);
+  }
 
-  getQuestion(){
-    var randomQuestion;
-    randomQuestion = this.props.questions[Math.floor(Math.random() * this.props.questions.length)];
+  getQuestion() {
+    var randomIndex = Math.floor(Math.random() * this.props.questions.length);
+    var randomQuestion = this.props.questions[randomIndex];
+
+    console.log(randomQuestion);
+
+    // Modify questions array in place to remove the current question
+    this.props.questions.splice(randomIndex, 1);
+
+    // if (this.props.questions.length === 0){
+    //   return false;
+    // }
+
+    console.log(this.props.questions);
+
+    // Sets the current question, clears guess and resets timeToAnswer and timeUntilNextQuestion
     this.setState({
-      currentQuestion: randomQuestion
+      currentQuestion: randomQuestion,
+      guess: "",
+      timeToAnswer: 5,
+      timeUntilNextQuestion: 5
     })
   }
 
-  start(){
-    this.timerID = setInterval(
-      () => this.tick(),
-      1000
-    );
+  outcomeTick() {
+    this.setState({
+      timeUntilNextQuestion: this.state.timeUntilNextQuestion - 1
+    });
+  }
+
+  start() {
+    // this.timerID = setTimeout(
+    //   () => this.tick(),
+    //   1000
+    // );
 
     this.setState({
       gameOn: true
     })
   }
 
-  render(){
+  tick() {
+    this.setState({
+      timeToAnswer: this.state.timeToAnswer - 1
+    });
+  }
+
+  handleGuess(guess) {
+    this.setState({
+      guess: guess
+    });
+  };
+
+  render() {
     console.log("Guess: " + this.state.guess);
-    console.log(this.state.timeToAnswer);
+    console.log("Time to answer: " + this.state.timeToAnswer);
+    console.log("Time until next: " + this.state.timeUntilNextQuestion);
 
     var display;
     var timeRemaining = (<p>Time: {this.state.timeToAnswer}</p>);
-    if (!this.state.gameOn){
+    var timeTilNext = (<p>Next question in: {this.state.timeUntilNextQuestion}</p>);
+    if (!this.state.gameOn) {
       timeRemaining = false;
+      timeTilNext = false;
       display = (<button onClick={this.start}>Start</button>);
-    } else if (!this.state.guess && this.state.timeToAnswer > 0){
+    } else if (!this.state.guess && this.state.timeToAnswer > 0) {
       display = (
-        <Question 
-          currentQuestion={this.state.currentQuestion} 
+        <Question
+          currentQuestion={this.state.currentQuestion}
           onUserGuess={this.handleGuess}
         />
       )
-    } else if (this.state.guess || this.state.timeToAnswer === 0){
-      clearInterval(this.timerID);
+    } else if (this.state.guess || this.state.timeToAnswer === 0) {
+      // clearTimeout(this.timerID);
       display = (
-        <Outcome 
-          guess={this.state.guess} 
-          correctAnswer={this.state.currentQuestion.correctAnswer} 
+        <Outcome
+          guess={this.state.guess}
+          correctAnswer={this.state.currentQuestion.correctAnswer}
           timeToAnswer={this.state.timeToAnswer}
         />
       )
-    }
+    } 
+    
+    // else if(){
+    //   display = (
+    //     <GameResults 
+    //       totalCorrectAnswers={this.state.totalCorrectAnswers}
+    //       totalIncorrectAnswers={this.state.totalIncorrectAnswers}
+    //       totalUnanswered={this.state.totalUnanswered}
+    //     />
+    //   )
+    // }
 
-    return(
+    return (
       <div>
         <h1>A Trivia Game</h1>
         {timeRemaining}
+        {timeTilNext}
         {display}
       </div>
     )
   }
 }
 
+// class GameResults extends Component {
+//   render(){
+//     return(
+//       <div>
+//         <h2>Game over!</h2>
+//         <p>Correct answers: {this.props.totalCorrectAnswers}</p>
+//         <p>Incorrect answers: {this.props.totalIncorrectAnswers}</p>
+//         <p>Unanswered: {this.props.totalUnanswered}</p>
+//       </div>
+//     )
+//   }
+// }
+
 class Outcome extends Component {
-  render(){
+  render() {
     var message;
     var correctAnswer = (<p>The correct answer is {this.props.correctAnswer}!</p>);
-    if (this.props.timeToAnswer === 0){
+    if (this.props.timeToAnswer === 0) {
       message = (<h3>Time's Up!</h3>);
-    } else if (this.props.guess === this.props.correctAnswer){
+    } else if (this.props.guess === this.props.correctAnswer) {
       message = (<h3>Correct!</h3>);
       correctAnswer = false;
     } else {
@@ -157,10 +245,10 @@ class Outcome extends Component {
 class Question extends Component {
   render() {
     var answers = [];
-    for (var i = 0; i < this.props.currentQuestion.answers.length; i++){
+    for (var i = 0; i < this.props.currentQuestion.answers.length; i++) {
       answers.push(
-        <Answer 
-          item={this.props.currentQuestion.answers[i]} 
+        <Answer
+          item={this.props.currentQuestion.answers[i]}
           key={i}
           onUserGuess={this.props.onUserGuess}
         />
@@ -177,18 +265,18 @@ class Question extends Component {
 }
 
 class Answer extends Component {
-  constructor(props){
+  constructor(props) {
     super(props);
     this.handleGuess = this.handleGuess.bind(this);
   }
 
-  handleGuess(event){
+  handleGuess(event) {
     this.props.onUserGuess(event.target.textContent);
-    console.log("Clicked " + event.target.textContent);
+    // console.log("Clicked " + event.target.textContent);
   }
 
   render() {
-    return(
+    return (
       <div className="Answer" onClick={this.handleGuess}>
         {this.props.item}
       </div>
