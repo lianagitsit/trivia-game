@@ -106,7 +106,8 @@ class GameBoard extends Component {
     if (this.state.gameOver) {
       clearTimeout(this.timerID);
       return;
-    } else if (this.state.guess || this.state.timeToAnswer === 1) {
+    } else if (this.state.timeToAnswer === 1) {
+      this.recordResults();
       clearTimeout(this.timerID);
 
       this.outcomeTimerID = setTimeout(
@@ -204,9 +205,16 @@ class GameBoard extends Component {
 
   // Handles guess data from Answer component
   handleGuess(guess) {
+    clearTimeout(this.timerID);
+
+    this.outcomeTimerID = setTimeout(
+      () => this.outcomeTick(),
+      1000
+    );
+
     this.setState(
       { guess: guess },
-      () => this.recordResults() // BUG: This doesn't fire if the user times out without clicking
+      () => this.recordResults() 
     );
   };
 
