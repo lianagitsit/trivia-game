@@ -173,6 +173,9 @@ class GameBoard extends Component {
     this.setState({
       gameOn: gameOn,
       gameOver: false,
+      totalCorrectAnswers: 0,
+      totalIncorrectAnswers: 0,
+      totalUnanswered: 0,
     })
   }
 
@@ -368,13 +371,13 @@ class Gif extends Component {
     }
   }
 
-  componentDidMount() {
+  componentWillMount() {
     var searchTerm = "confused";
-    fetch("http://api.giphy.com/v1/gifs/search?q=" + searchTerm + "&api_key=CymhH6SlUPj3Xk8g8Y115zIFK0lyCDhV&limit=1")
+    fetch("http://api.giphy.com/v1/gifs/random?api_key=CymhH6SlUPj3Xk8g8Y115zIFK0lyCDhV&limit=1&tag=" + searchTerm)
     .then(response => response.json())
-    .then(data => {
-      console.log(data);
-      this.setState({gifURL: data.data[0].images.fixed_height.url})
+    .then(results => {
+      console.log(results);
+      this.setState({gifURL: results.data.images.fixed_height.url})
     })
   }
 
@@ -382,7 +385,6 @@ class Gif extends Component {
   var myGif = this.state.gifURL? (<img src={this.state.gifURL} />) : false
     return(
       <div>
-        GIIIIIF
         {myGif}
       </div>
     )
