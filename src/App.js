@@ -4,27 +4,33 @@ import './App.css';
 
 const QUESTIONS = [
   {
-    question: "What is my name?",
-    answers: ["Liana", "Bob", "Sally", "Jo"],
-    correctAnswer: "Liana"
+    question: "Props are read-only",
+    answers: ["True", "False"],
+    correctAnswer: "True"
   },
 
   {
-    question: "What is my favorite color?",
-    answers: ["brown", "green", "pink", "puce"],
-    correctAnswer: "green"
+    question: "Which lifecycle hook runs after the component output has been rendered to the DOM?",
+    answers: ["componentWillMount()", "componentDidUpdate()", "componentDidMount()", "render()"],
+    correctAnswer: "componentDidMount()"
   },
 
   {
-    question: "What is the meaning of life?",
-    answers: ["10", "46", "42", "1"],
-    correctAnswer: "42"
+    question: "Which statement correctly binds the handleClick method?",
+    answers: ["this.handleClick = this.handleClick.bind(this);", 
+      "this = this.handleClick.bind(this);", 
+      "this.handleClick = handleClick.bind(this);", 
+      "this.handleClick = this.bind(this);"],
+    correctAnswer: "this.handleClick = this.handleClick.bind(this);"
   },
 
   {
-    question: "So long and thanks for all the...",
-    answers: ["waffles", "bananas", "helicopters", "fish"],
-    correctAnswer: "fish"
+    question: "Which question is NOT useful in determining whether or not data is state?",
+    answers: ["Is it passed in from a parent via props?", 
+    "Does it remain unchanged over time?", 
+    "Will it be not at all confusing to update from children to parent components?", 
+    "Can you compute it based on any other state or props in your component?"],
+    correctAnswer: "Will it be not at all confusing to update from children to parent components?"
   }
 ];
 
@@ -306,6 +312,7 @@ class Outcome extends Component {
       <div>
         {message}
         {correctAnswer}
+        <Gif />
       </div>
     )
   }
@@ -348,6 +355,35 @@ class Answer extends Component {
     return (
       <div className="Answer" onClick={this.handleGuess}>
         {this.props.item}
+      </div>
+    )
+  }
+}
+
+class Gif extends Component {
+  constructor(props){
+    super(props);
+    this.state = {
+      gifURL: ""
+    }
+  }
+
+  componentDidMount() {
+    var searchTerm = "confused";
+    fetch("http://api.giphy.com/v1/gifs/search?q=" + searchTerm + "&api_key=CymhH6SlUPj3Xk8g8Y115zIFK0lyCDhV&limit=1")
+    .then(response => response.json())
+    .then(data => {
+      console.log(data);
+      this.setState({gifURL: data.data[0].images.fixed_height.url})
+    })
+  }
+
+  render(){
+  var myGif = this.state.gifURL? (<img src={this.state.gifURL} />) : false
+    return(
+      <div>
+        GIIIIIF
+        {myGif}
       </div>
     )
   }
