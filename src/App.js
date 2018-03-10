@@ -54,7 +54,7 @@ class GameBoard extends Component {
     this.state = {
       gameOn: false,
       gameOver: false,
-      timeToAnswer: 5,
+      timeToAnswer: 10,
       timeUntilNextQuestion: 5,
       guess: "",
       totalCorrectAnswers: 0,
@@ -101,7 +101,7 @@ class GameBoard extends Component {
       gameOver: gameOver,
       currentQuestion: randomQuestion,
       guess: "",
-      timeToAnswer: 5,
+      timeToAnswer: 10,
       timeUntilNextQuestion: 5,
       questionsCopy: newQuestionsCopy
     })
@@ -230,12 +230,10 @@ class GameBoard extends Component {
   render() {
 
     var display;
-    var timeRemaining = (<p>Time: {this.state.timeToAnswer}</p>);
-    var timeTilNext = (<p>Next question in: {this.state.timeUntilNextQuestion}</p>);
+    var timeRemaining = (<p>Time remaining: {this.state.timeToAnswer} seconds</p>);
 
     if (!this.state.gameOn && !this.state.gameOver) {
       timeRemaining = false;
-      timeTilNext = false;
       display = (<button onClick={this.start}>Start</button>);
     } else if (this.state.gameOver) {
       display = (
@@ -259,6 +257,7 @@ class GameBoard extends Component {
           guess={this.state.guess}
           correctAnswer={this.state.currentQuestion.correctAnswer}
           timeToAnswer={this.state.timeToAnswer}
+          timeTilNext={this.state.timeUntilNextQuestion}
         />
       )
     }
@@ -267,7 +266,6 @@ class GameBoard extends Component {
       <div>
         <h1>A Trivia Game</h1>
         {timeRemaining}
-        {timeTilNext}
         {display}
       </div>
     )
@@ -302,6 +300,8 @@ class Outcome extends Component {
   render() {
     var message;
     var correctAnswer = (<p>The correct answer is {this.props.correctAnswer}!</p>);
+    var timeTilNext = (<p>Next question in: {this.props.timeTilNext} seconds</p>);
+
     if (this.props.timeToAnswer === 0) {
       message = (<h3>Time's Up!</h3>);
     } else if (this.props.guess === this.props.correctAnswer) {
@@ -313,6 +313,7 @@ class Outcome extends Component {
 
     return (
       <div>
+        {timeTilNext}
         {message}
         {correctAnswer}
         <Gif />
