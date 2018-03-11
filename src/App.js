@@ -25,12 +25,12 @@ const QUESTIONS = [
   },
 
   {
-    question: "Which question is NOT useful in determining whether or not data is state?",
-    answers: ["Is it passed in from a parent via props?", 
-    "Does it remain unchanged over time?", 
-    "Will it be not at all confusing to update from children to parent components?", 
-    "Can you compute it based on any other state or props in your component?"],
-    correctAnswer: "Will it be not at all confusing to update from children to parent components?"
+    question: "Which of the following is most likely NOT state?",
+    answers: ["Time remaining until next question", 
+    "Static list of questions and answers", 
+    "User's guess input", 
+    "Game's ON/OFF boolean"],
+    correctAnswer: "Static list of questions and answers"
   }
 ];
 
@@ -39,10 +39,17 @@ class App extends Component {
     return (
       <div className="App">
         <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to A Trivia Game</h1>
+          <h1 className="App-title"><span className="React-title">React</span> Trivia</h1>
         </header>
-        <GameBoard questions={QUESTIONS} />
+        <div className="row">
+          <div className="col-md-6 col-md-offset-1">
+            <GameBoard questions={QUESTIONS} />
+          </div>
+          <div className="col-md-3 no-padding text-center">
+            <div className="Question-mark">?</div>
+            <img src={logo} className="App-logo center-block" alt="logo" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -54,7 +61,7 @@ class GameBoard extends Component {
     this.state = {
       gameOn: false,
       gameOver: false,
-      timeToAnswer: 10,
+      timeToAnswer: 20,
       timeUntilNextQuestion: 5,
       guess: "",
       totalCorrectAnswers: 0,
@@ -101,7 +108,7 @@ class GameBoard extends Component {
       gameOver: gameOver,
       currentQuestion: randomQuestion,
       guess: "",
-      timeToAnswer: 10,
+      timeToAnswer: 20,
       timeUntilNextQuestion: 5,
       questionsCopy: newQuestionsCopy
     })
@@ -230,11 +237,11 @@ class GameBoard extends Component {
   render() {
 
     var display;
-    var timeRemaining = (<p>Time remaining: {this.state.timeToAnswer} seconds</p>);
+    var timeRemaining = (<p className="Time-display">{this.state.timeToAnswer}</p>);
 
     if (!this.state.gameOn && !this.state.gameOver) {
       timeRemaining = false;
-      display = (<button onClick={this.start}>Start</button>);
+      display = (<button className="Start-btn btn-lg" onClick={this.start}>Start</button>);
     } else if (this.state.gameOver) {
       display = (
         <GameResults
@@ -263,8 +270,7 @@ class GameBoard extends Component {
     }
 
     return (
-      <div>
-        <h1>A Trivia Game</h1>
+      <div className="Display">
         {timeRemaining}
         {display}
       </div>
@@ -289,7 +295,7 @@ class GameResults extends Component {
         <p>Correct answers: {this.props.totalCorrectAnswers}</p>
         <p>Incorrect answers: {this.props.totalIncorrectAnswers}</p>
         <p>Unanswered: {this.props.totalUnanswered}</p>
-        <button data-game-on="true" onClick={this.restart}>Play again?</button>
+        <button data-game-on="true" className="Start-btn btn-lg Restart" onClick={this.restart}>Play again?</button>
       </div>
     )
   }
@@ -312,7 +318,7 @@ class Outcome extends Component {
     }
 
     return (
-      <div>
+      <div className="Outcome-display">
         {timeTilNext}
         {message}
         {correctAnswer}
@@ -368,7 +374,7 @@ class Gif extends Component {
   constructor(props){
     super(props);
     this.state = {
-      gifURL: ""
+      gif: {}
     }
   }
 
@@ -378,12 +384,12 @@ class Gif extends Component {
     .then(response => response.json())
     .then(results => {
       console.log(results);
-      this.setState({gifURL: results.data.images.fixed_height.url})
+      this.setState({gif: results.data.images.fixed_height})
     })
   }
 
   render(){
-  var myGif = this.state.gifURL? (<img src={this.state.gifURL} />) : false
+  var myGif = this.state.gif.url ? (<img src={this.state.gif.url} alt="gif"/>) : (<i className="fa fa-circle-o-notch fa-spin"></i>);
     return(
       <div>
         {myGif}
@@ -395,4 +401,4 @@ class Gif extends Component {
 export default App;
 
 
-//TODO: Let users enter their own questions and answers. 
+// TODO: Let users enter their own questions and answers. 

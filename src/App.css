@@ -15,16 +15,59 @@
 }
 
 .App-title {
-  font-size: 1.5em;
+  font-size: 3em;
 }
 
 .App-intro {
   font-size: large;
 }
 
+.no-padding {
+  padding: 0 !important;
+}
+
+.Question-mark {
+  color: #2df;
+  font-size: 40em;
+  font-weight: bold;
+  display: inline-block;
+  line-height: .8em;
+  max-height: .6em;
+  overflow: hidden;
+}
+
+.Display {
+  border: 5px solid #2df;
+  color: white;
+  min-height: 20em;
+  font-size: 1.3em;
+  margin: 0 auto;
+  padding: 4em 2em;
+}
+
+.Start-btn {
+  margin-top: 4em;
+  border: 2px solid #2df;
+  color: #2df;
+  background-color: #222;
+}
+
+.Start-btn:hover {
+  background-color: #2df;
+  color: white;
+}
+
+.Restart {
+  margin-top: 5% !important;
+}
+
+.Time-display {
+  color: #2df;
+}
+
 .Answer {
   margin: 5px auto;
-  width: 33%;
+  width: 75%;
   border: 1px dotted gray;
   padding: 5px 0;
 }
@@ -32,6 +75,15 @@
 .Answer:hover {
   cursor: pointer;
   border: 1px solid violet;
+}
+
+.fa-circle-o-notch {
+  color: #2df;
+  font-size: 24px;
+}
+
+.React-title {
+  font-weight: bolder;
 }
 
 @keyframes App-logo-spin {
