@@ -389,7 +389,7 @@ class Gif extends Component {
   }
 
   render(){
-  var myGif = this.state.gif.url ? (<img src={this.state.gif.url} alt="gif"/>) : (<i className="fa fa-circle-o-notch fa-spin"></i>);
+  var myGif = this.state.gif.url ? (<img className="center-block img-responsive" src={this.state.gif.url} alt="gif"/>) : (<i className="fa fa-circle-o-notch fa-spin"></i>);
     return(
       <div>
         {myGif}

@@ -41,7 +41,7 @@
   color: white;
   min-height: 20em;
   font-size: 1.3em;
-  margin: 0 auto;
+  margin: 0 auto 2em 0;
   padding: 4em 2em;
 }
 
@@ -89,4 +89,10 @@
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+@media screen and (max-width: 320px) {
+  .Answer { 
+    width: 100%;
+  }
 }
