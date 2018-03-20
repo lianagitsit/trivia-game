@@ -1,3 +1,10 @@
+# React Trivia
+
+<img src="src/react-trivia-ss.png" alt="react trivia screen shot" width="400">
+
+A timed trivia game designed to test how well you know React. Better be quick about it, the clock's tickin'.
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
 
 Below you will find some information on how to perform common tasks.<br>
